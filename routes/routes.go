@@ -1,11 +1,9 @@
 package routes
 
 import (
-	"log"
-	"miniproject/controller"
-	"os"
+	c "miniproject/controller"
+	m "miniproject/middleware"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	mid "github.com/labstack/echo/v4/middleware"
 )
@@ -15,74 +13,76 @@ func Init() *echo.Echo {
 
 	e.Pre(mid.AddTrailingSlash())
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	secretKey := os.Getenv("SECRET_KEY")
-	jwt := mid.JWT([]byte(secretKey))
-
 	gArea := e.Group("/area")
-	gArea.GET("/", controller.GetAreas, jwt)
-	gArea.POST("/", controller.CreateArea, jwt)
-	gArea.PUT("/:id/", controller.UpdateArea, jwt)
-	gArea.DELETE("/:id/", controller.DeleteArea, jwt)
+	gArea.GET("/", c.GetAreas, m.IsloggedIn, m.IsAdmin)
+	gArea.POST("/", c.CreateArea, m.IsloggedIn)
+	gArea.PUT("/:id/", c.UpdateArea, m.IsloggedIn)
+	gArea.DELETE("/:id/", c.DeleteArea, m.IsloggedIn)
 
 	gCleaner := e.Group("/cleaner")
-	gCleaner.GET("/", controller.GetCleaners, jwt)
-	gCleaner.POST("/", controller.CreateCleaner, jwt)
-	gCleaner.GET("/:id/", controller.GetCleaner, jwt)
-	gCleaner.PUT("/:id/", controller.UpdateCleaner, jwt)
-	gCleaner.DELETE("/:id/", controller.DeleteCleaner, jwt)
+	gCleaner.GET("/", c.GetCleaners, m.IsloggedIn)
+	gCleaner.POST("/", c.CreateCleaner, m.IsloggedIn)
+	gCleaner.GET("/:id/", c.GetCleaner, m.IsloggedIn)
+	gCleaner.PUT("/:id/", c.UpdateCleaner, m.IsloggedIn)
+	gCleaner.DELETE("/:id/", c.DeleteCleaner, m.IsloggedIn)
 
 	gCustomer := e.Group("/customer")
-	gCustomer.GET("/", controller.GetCustomers, jwt)
-	gCustomer.POST("/", controller.CreateCustomer)
-	gCustomer.GET("/:id/", controller.GetCustomer, jwt)
-	gCustomer.PUT("/:id/", controller.UpdateCustomer, jwt)
-	gCustomer.DELETE("/:id/", controller.DeleteCustomer, jwt)
+	gCustomer.GET("/", c.GetCustomers, m.IsloggedIn)
+	gCustomer.POST("/", c.CreateCustomer)
+	gCustomer.GET("/:id/", c.GetCustomer, m.IsloggedIn)
+	gCustomer.PUT("/:id/", c.UpdateCustomer, m.IsloggedIn)
+	gCustomer.DELETE("/:id/", c.DeleteCustomer, m.IsloggedIn)
+	gCustomer.POST("/login/", c.LoginCustomer)
+
+	gAdmin := e.Group("/admin")
+	gAdmin.GET("/", c.GetAdmins, m.IsloggedIn)
+	gAdmin.POST("/", c.CreateAdmin)
+	gAdmin.GET("/:id/", c.GetAdmin, m.IsloggedIn)
+	gAdmin.PUT("/:id/", c.UpdateAdmin, m.IsloggedIn)
+	gAdmin.DELETE("/:id/", c.DeleteAdmin, m.IsloggedIn)
+	gAdmin.POST("/login/", c.LoginAdmin)
 
 	gPayment := e.Group("/payment")
-	gPayment.GET("/", controller.GetPayments, jwt)
-	gPayment.POST("/", controller.CreatePayment, jwt)
-	gPayment.GET("/:id/", controller.GetPayment, jwt)
-	gPayment.PUT("/:id/", controller.UpdatePayment, jwt)
-	gPayment.DELETE("/:id/", controller.DeletePayment, jwt)
+	gPayment.GET("/", c.GetPayments, m.IsloggedIn)
+	gPayment.POST("/", c.CreatePayment, m.IsloggedIn)
+	gPayment.GET("/:id/", c.GetPayment, m.IsloggedIn)
+	gPayment.PUT("/:id/", c.UpdatePayment, m.IsloggedIn)
+	gPayment.DELETE("/:id/", c.DeletePayment, m.IsloggedIn)
 
 	gServiceType := e.Group("/service-type")
-	gServiceType.GET("/", controller.GetServiceTypes, jwt)
-	gServiceType.POST("/", controller.CreateServiceType, jwt)
-	gServiceType.GET("/:id/", controller.GetServiceType, jwt)
-	gServiceType.PUT("/:id/", controller.UpdateServiceType, jwt)
-	gServiceType.DELETE("/:id/", controller.DeleteServiceType, jwt)
+	gServiceType.GET("/", c.GetServiceTypes, m.IsloggedIn)
+	gServiceType.POST("/", c.CreateServiceType, m.IsloggedIn)
+	gServiceType.GET("/:id/", c.GetServiceType, m.IsloggedIn)
+	gServiceType.PUT("/:id/", c.UpdateServiceType, m.IsloggedIn)
+	gServiceType.DELETE("/:id/", c.DeleteServiceType, m.IsloggedIn)
 
 	gStore := e.Group("/store")
-	gStore.GET("/", controller.GetStores, jwt)
-	gStore.POST("/", controller.CreateStore, jwt)
-	gStore.GET("/:id/", controller.GetStore, jwt)
-	gStore.PUT("/:id/", controller.UpdateStore, jwt)
-	gStore.DELETE("/:id/", controller.DeleteStore, jwt)
+	gStore.GET("/", c.GetStores, m.IsloggedIn)
+	gStore.POST("/", c.CreateStore, m.IsloggedIn)
+	gStore.GET("/:id/", c.GetStore, m.IsloggedIn)
+	gStore.PUT("/:id/", c.UpdateStore, m.IsloggedIn)
+	gStore.DELETE("/:id/", c.DeleteStore, m.IsloggedIn)
 
 	gTeam := e.Group("/team")
-	gTeam.GET("/", controller.GetTeams, jwt)
-	gTeam.POST("/", controller.CreateTeam, jwt)
-	gTeam.GET("/:id/", controller.GetTeam, jwt)
-	gTeam.PUT("/:id/", controller.UpdateTeam, jwt)
-	gTeam.DELETE("/:id/", controller.DeleteTeam, jwt)
+	gTeam.GET("/", c.GetTeams, m.IsloggedIn)
+	gTeam.POST("/", c.CreateTeam, m.IsloggedIn)
+	gTeam.GET("/:id/", c.GetTeam, m.IsloggedIn)
+	gTeam.PUT("/:id/", c.UpdateTeam, m.IsloggedIn)
+	gTeam.DELETE("/:id/", c.DeleteTeam, m.IsloggedIn)
 
 	gTransaction := e.Group("/transaction")
-	gTransaction.GET("/", controller.GetTransactions, jwt)
-	gTransaction.POST("/", controller.CreateTransaction, jwt)
-	gTransaction.GET("/:id/", controller.GetTransaction, jwt)
-	gTransaction.PUT("/:id/", controller.UpdateTransaction, jwt)
-	gTransaction.DELETE("/:id/", controller.DeleteTransaction, jwt)
+	gTransaction.GET("/", c.GetTransactions, m.IsloggedIn)
+	gTransaction.POST("/", c.CreateTransaction, m.IsloggedIn)
+	gTransaction.GET("/:id/", c.GetTransaction, m.IsloggedIn)
+	gTransaction.PUT("/:id/", c.UpdateTransaction, m.IsloggedIn)
+	gTransaction.DELETE("/:id/", c.DeleteTransaction, m.IsloggedIn)
 
-	gTransactionDetail := e.Group("/Transaction-Detail")
-	gTransactionDetail.GET("/", controller.GetTransactionDetails, jwt)
-	gTransactionDetail.POST("/", controller.CreateTransactionDetail, jwt)
-	gTransactionDetail.GET("/:id/", controller.GetTransactionDetail, jwt)
-	gTransactionDetail.PUT("/:id/", controller.UpdateTransactionDetail, jwt)
-	gTransactionDetail.DELETE("/:id/", controller.DeleteTransactionDetail, jwt)
+	gTransactionDetail := e.Group("/transaction-detail")
+	gTransactionDetail.GET("/", c.GetTransactionDetails, m.IsloggedIn)
+	gTransactionDetail.POST("/", c.CreateTransactionDetail, m.IsloggedIn)
+	gTransactionDetail.GET("/:id/", c.GetTransactionDetail, m.IsloggedIn)
+	gTransactionDetail.PUT("/:id/", c.UpdateTransactionDetail, m.IsloggedIn)
+	gTransactionDetail.DELETE("/:id/", c.DeleteTransactionDetail, m.IsloggedIn)
 
 	return e
 }

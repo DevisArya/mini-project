@@ -9,14 +9,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func CreateToken(userId int, name string) (string, error) {
+func CreateToken(userId int, name string, role bool) (string, error) {
 	payload := jwt.MapClaims{}
 	payload["userId"] = userId
 	payload["name"] = name
-	// payload["role"] = role
+	payload["role"] = role
 	payload["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, payload)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")

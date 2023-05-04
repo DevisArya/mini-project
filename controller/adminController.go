@@ -10,9 +10,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetCustomer(c echo.Context) error {
+func GetAdmin(c echo.Context) error {
 
-	var customer m.Customer
+	var admin m.Admin
 
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -22,49 +22,49 @@ func GetCustomer(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&customer).Error; err != nil {
+	if err := config.DB.Where("id = ?", id).First(&admin).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "customer not found",
+			"message": "admin not found",
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success get customer",
-		"customer": customer,
+		"message": "success get admin",
+		"admin":   admin,
 	})
 
 }
 
-func GetCustomers(c echo.Context) error {
+func GetAdmins(c echo.Context) error {
 
-	var customers []m.Customer
+	var admins []m.Admin
 
-	if err := config.DB.Find(&customers).Error; err != nil {
+	if err := config.DB.Find(&admins).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":   "success get all customers",
-		"customers": customers,
+		"message": "success get all admins",
+		"admins":  admins,
 	})
 }
 
-func CreateCustomer(c echo.Context) error {
+func CreateAdmin(c echo.Context) error {
 
-	customer := m.Customer{}
-	c.Bind(&customer)
-	customer.Role = false
+	admin := m.Admin{}
+	c.Bind(&admin)
+	admin.Role = true
 
-	if err := config.DB.Save(&customer).Error; err != nil {
+	if err := config.DB.Save(&admin).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "succes create new customer",
-		"customer": customer,
+		"message": "succes create new admin",
+		"admin":   admin,
 	})
 }
 
-func DeleteCustomer(c echo.Context) error {
+func DeleteAdmin(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -73,7 +73,7 @@ func DeleteCustomer(c echo.Context) error {
 		})
 	}
 
-	result := config.DB.Delete(&m.Customer{}, id)
+	result := config.DB.Delete(&m.Admin{}, id)
 
 	if err := result.Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -85,12 +85,12 @@ func DeleteCustomer(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete customer",
+		"message": "success delete admin",
 	})
 }
 
-func UpdateCustomer(c echo.Context) error {
-	updateData := m.Customer{}
+func UpdateAdmin(c echo.Context) error {
+	updateData := m.Admin{}
 	c.Bind(&updateData)
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -101,7 +101,7 @@ func UpdateCustomer(c echo.Context) error {
 		})
 	}
 
-	result := config.DB.Model(&m.Customer{}).Where("id = ?", id).Updates(&updateData)
+	result := config.DB.Model(&m.Admin{}).Where("id = ?", id).Updates(&updateData)
 
 	if err := result.Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -114,22 +114,22 @@ func UpdateCustomer(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update customer",
+		"message": "success update admin",
 	})
 }
 
-func LoginCustomer(c echo.Context) error {
-	customer := m.Customer{}
-	c.Bind(&customer)
+func LoginAdmin(c echo.Context) error {
+	admin := m.Admin{}
+	c.Bind(&admin)
 
-	if err := config.DB.Where("email = ? AND password = ?", customer.Email, customer.Password).First(&customer).Error; err != nil {
+	if err := config.DB.Where("email = ? AND password = ?", admin.Email, admin.Password).First(&admin).Error; err != nil {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "fail login",
 			"error":   err.Error(),
 		})
 	}
 
-	token, err := md.CreateToken(int(customer.ID), customer.Name, customer.Role)
+	token, err := md.CreateToken(int(admin.ID), admin.Name, admin.Role)
 	if err != nil {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "fail login",
@@ -137,10 +137,10 @@ func LoginCustomer(c echo.Context) error {
 		})
 	}
 
-	customerResponse := m.CustomerResponse{ID: int(customer.ID), Name: customer.Name, Email: customer.Email, Token: token}
+	adminResponse := m.AdminResponse{ID: int(admin.ID), Name: admin.Name, Email: admin.Email, Token: token}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success login",
-		"customer": customerResponse,
+		"message": "success login",
+		"admin":   adminResponse,
 	})
 }
