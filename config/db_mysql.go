@@ -58,6 +58,7 @@ func InitDB() {
 func InitialMigration() {
 	DB.AutoMigrate(
 		&models.Customer{},
+		&models.Admin{},
 		&models.Area{},
 		&models.Cleaner{},
 		&models.Payment{},
