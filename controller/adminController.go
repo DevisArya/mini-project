@@ -4,6 +4,7 @@ import (
 	"miniproject/config"
 	md "miniproject/middleware"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -53,6 +54,16 @@ func CreateAdmin(c echo.Context) error {
 	admin := m.Admin{}
 	c.Bind(&admin)
 	admin.Role = true
+
+	password := admin.Password
+
+	hash, err := u.HashPassword(password)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	admin.Password = hash
 
 	if err := config.DB.Save(&admin).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -122,16 +133,24 @@ func LoginAdmin(c echo.Context) error {
 	admin := m.Admin{}
 	c.Bind(&admin)
 
-	if err := config.DB.Where("email = ? AND password = ?", admin.Email, admin.Password).First(&admin).Error; err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "fail login",
+	password := admin.Password
+
+	if err := config.DB.Where("email = ?", admin.Email).First(&admin).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "user not found",
 			"error":   err.Error(),
+		})
+	}
+
+	if match := u.CheckPasswordHash(password, admin.Password); match == false {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "mismatch password",
 		})
 	}
 
 	token, err := md.CreateToken(int(admin.ID), admin.Name, admin.Role)
 	if err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "fail login",
 			"error":   err.Error(),
 		})

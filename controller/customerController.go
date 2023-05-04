@@ -4,6 +4,7 @@ import (
 	"miniproject/config"
 	md "miniproject/middleware"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -53,6 +54,16 @@ func CreateCustomer(c echo.Context) error {
 	customer := m.Customer{}
 	c.Bind(&customer)
 	customer.Role = false
+
+	password := customer.Password
+
+	hash, err := u.HashPassword(password)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	customer.Password = hash
 
 	if err := config.DB.Save(&customer).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -122,16 +133,24 @@ func LoginCustomer(c echo.Context) error {
 	customer := m.Customer{}
 	c.Bind(&customer)
 
-	if err := config.DB.Where("email = ? AND password = ?", customer.Email, customer.Password).First(&customer).Error; err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "fail login",
+	password := customer.Password
+
+	if err := config.DB.Where("email = ?", customer.Email).First(&customer).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "user not found",
 			"error":   err.Error(),
+		})
+	}
+
+	if match := u.CheckPasswordHash(password, customer.Password); match == false {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "mismatch password",
 		})
 	}
 
 	token, err := md.CreateToken(int(customer.ID), customer.Name, customer.Role)
 	if err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "fail login",
 			"error":   err.Error(),
 		})
