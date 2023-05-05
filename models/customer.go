@@ -4,12 +4,12 @@ import "gorm.io/gorm"
 
 type Customer struct {
 	gorm.Model
-	Name        string `json:"name" form:"name"`
-	Address     string `json:"address" form:"address"`
-	Phone       string `json:"phone" form:"phone"`
-	Email       string `json:"email" form:"email"`
+	Name        string `json:"name" form:"name" validate:"required"`
+	Address     string `json:"address" form:"address" validate:"required"`
+	Phone       string `json:"phone" form:"phone" validate:"required,min=10,max=13"`
+	Email       string `json:"email" form:"email" validate:"required,email"`
 	Role        bool
-	Password    string        `json:"password" form:"password"`
+	Password    string        `json:"password" form:"password" validate:"required"`
 	Transaction []Transaction `gorm:"foreignKey:CustomerID"`
 }
 

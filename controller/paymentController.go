@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -51,6 +52,11 @@ func CreatePayment(c echo.Context) error {
 
 	payment := m.Payment{}
 	c.Bind(&payment)
+
+	valid := u.PostPaymentValidation(payment)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&payment).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

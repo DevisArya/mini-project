@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -51,6 +52,11 @@ func CreateCleaner(c echo.Context) error {
 
 	cleaner := m.Cleaner{}
 	c.Bind(&cleaner)
+
+	valid := u.PostCleanerValidation(cleaner)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&cleaner).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

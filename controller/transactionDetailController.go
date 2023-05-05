@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -48,9 +49,21 @@ func GetTransactionDetails(c echo.Context) error {
 }
 
 func CreateTransactionDetail(c echo.Context) error {
-
+	serviceType := m.ServiceType{}
 	transactionDetail := m.TransactionDetail{}
 	c.Bind(&transactionDetail)
+
+	valid := u.PostTransactionDetailValidation(transactionDetail)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
+
+	if err := config.DB.First(&serviceType, transactionDetail.ServiceTypeID).Error; err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	totalPrice := serviceType.Price * uint64(transactionDetail.Qty)
+	transactionDetail.TotalPrice = uint(totalPrice)
 
 	if err := config.DB.Save(&transactionDetail).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

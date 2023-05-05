@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -26,6 +27,11 @@ func CreateArea(c echo.Context) error {
 
 	area := m.Area{}
 	c.Bind(&area)
+
+	valid := u.PostAreaValidation(area)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&area).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

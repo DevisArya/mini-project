@@ -64,6 +64,10 @@ func CreateAdmin(c echo.Context) error {
 	}
 
 	admin.Password = hash
+	valid := u.PostAdminValidation(admin)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&admin).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -110,6 +114,23 @@ func UpdateAdmin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "invalid id",
 		})
+	}
+
+	if updateData.Password != "" {
+		hash, err := u.HashPassword(updateData.Password)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		updateData.Password = hash
+	}
+
+	if updateData.Email != "" {
+		valid := u.EmailValidation(updateData.Email)
+		if valid != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		}
 	}
 
 	result := config.DB.Model(&m.Admin{}).Where("id = ?", id).Updates(&updateData)
