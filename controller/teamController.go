@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -51,6 +52,11 @@ func CreateTeam(c echo.Context) error {
 
 	team := m.Team{}
 	c.Bind(&team)
+
+	valid := u.PostTeamValidation(team)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&team).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

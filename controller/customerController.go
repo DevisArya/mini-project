@@ -64,6 +64,10 @@ func CreateCustomer(c echo.Context) error {
 	}
 
 	customer.Password = hash
+	valid := u.PostCustValidation(customer)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
 
 	if err := config.DB.Save(&customer).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -110,6 +114,22 @@ func UpdateCustomer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "invalid id",
 		})
+	}
+
+	if updateData.Password != "" {
+		hash, err := u.HashPassword(updateData.Password)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		updateData.Password = hash
+	}
+	if updateData.Email != "" {
+		valid := u.EmailValidation(updateData.Email)
+		if valid != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		}
 	}
 
 	result := config.DB.Model(&m.Customer{}).Where("id = ?", id).Updates(&updateData)

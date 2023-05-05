@@ -3,6 +3,7 @@ package controller
 import (
 	"miniproject/config"
 	m "miniproject/models"
+	u "miniproject/utils"
 	"net/http"
 	"strconv"
 
@@ -52,6 +53,15 @@ func CreateTransaction(c echo.Context) error {
 	transaction := m.Transaction{}
 	c.Bind(&transaction)
 
+	valid := u.PostTransactionValidation(transaction)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
+
+	if transaction.Rating != 0 || transaction.Status != false {
+		return echo.NewHTTPError(http.StatusUnauthorized, "message: can't change status or rating")
+	}
+
 	if err := config.DB.Save(&transaction).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -99,6 +109,10 @@ func UpdateTransaction(c echo.Context) error {
 		})
 	}
 
+	if updateData.Rating != 0 || updateData.Status != false {
+		return echo.NewHTTPError(http.StatusUnauthorized, "message: can't change status or rating")
+	}
+
 	result := config.DB.Model(&m.Transaction{}).Where("id = ?", id).Updates(&updateData)
 
 	if err := result.Error; err != nil {
@@ -113,5 +127,73 @@ func UpdateTransaction(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success update transaction",
+	})
+}
+
+func UpdateRating(c echo.Context) error {
+	updateRating := m.TransactionUpdateRating{}
+	c.Bind(&updateRating)
+
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "invalid id",
+		})
+	}
+
+	valid := u.PostRatingValidation(updateRating)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
+
+	result := config.DB.Model(&m.Transaction{}).Where("id = ?", id).Updates(&updateRating)
+
+	if err := result.Error; err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// if result.RowsAffected < 1 {
+	// 	return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+	// 		"message": "id not found",
+	// 	})
+	// }
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update rating",
+	})
+}
+
+func UpdateStatus(c echo.Context) error {
+	updateStatus := m.TransactionUpdateStatus{}
+	c.Bind(&updateStatus)
+
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "invalid id",
+		})
+	}
+
+	valid := u.PostStatusValidation(updateStatus)
+	if valid != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+	}
+
+	result := config.DB.Model(&m.Transaction{}).Where("id = ?", id).Updates(&updateStatus)
+
+	if err := result.Error; err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// if result.RowsAffected < 1 {
+	// 	return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+	// 		"message": "id not found",
+	// 	})
+	// }
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update rating",
 	})
 }
