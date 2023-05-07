@@ -22,7 +22,7 @@ func GetPayment(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&payment).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Where("id = ?", id).First(&payment).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "payment not found",
 		})
@@ -39,9 +39,10 @@ func GetPayments(c echo.Context) error {
 
 	var payments []m.Payment
 
-	if err := config.DB.Find(&payments).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Find(&payments).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":  "success get all payments",
 		"payments": payments,

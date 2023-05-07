@@ -22,7 +22,7 @@ func GetTransaction(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&transaction).Error; err != nil {
+	if err := config.DB.Preload("TransactionDetails").Where("id = ?", id).First(&transaction).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "transaction not found",
 		})
@@ -39,7 +39,7 @@ func GetTransactions(c echo.Context) error {
 
 	var transactions []m.Transaction
 
-	if err := config.DB.Find(&transactions).Error; err != nil {
+	if err := config.DB.Preload("TransactionDetails").Find(&transactions).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{

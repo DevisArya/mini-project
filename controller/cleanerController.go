@@ -22,7 +22,7 @@ func GetCleaner(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&cleaner).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Where("id = ?", id).First(&cleaner).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "cleaner not found",
 		})
@@ -39,7 +39,7 @@ func GetCleaners(c echo.Context) error {
 
 	var cleaners []m.Cleaner
 
-	if err := config.DB.Find(&cleaners).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Find(&cleaners).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
