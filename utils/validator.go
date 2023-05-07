@@ -177,3 +177,14 @@ func PostTeamValidation(team models.Team) error {
 
 	return nil
 }
+
+// func UserActValidator(c echo.Context, id int) error {
+// 	user := c.Get("user").(*jwt.Token)
+// 	claims := user.Claims.(jwt.MapClaims)
+// 	claimsID := claims["id"]
+
+// 	if claimsID == id {
+// 		return errors.New("message: unauthorize delete or update")
+// 	}
+// 	return nil
+// }

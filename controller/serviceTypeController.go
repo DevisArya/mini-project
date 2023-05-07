@@ -22,7 +22,7 @@ func GetServiceType(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&serviceType).Error; err != nil {
+	if err := config.DB.Preload("TransactionDetails").Where("id = ?", id).First(&serviceType).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "service type not found",
 		})
@@ -39,7 +39,7 @@ func GetServiceTypes(c echo.Context) error {
 
 	var serviceTypes []m.ServiceType
 
-	if err := config.DB.Find(&serviceTypes).Error; err != nil {
+	if err := config.DB.Preload("TransactionDetails").Find(&serviceTypes).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{

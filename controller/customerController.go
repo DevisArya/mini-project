@@ -23,7 +23,7 @@ func GetCustomer(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&customer).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Where("id = ?", id).First(&customer).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "customer not found",
 		})
@@ -40,7 +40,7 @@ func GetCustomers(c echo.Context) error {
 
 	var customers []m.Customer
 
-	if err := config.DB.Find(&customers).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Find(&customers).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{

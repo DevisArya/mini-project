@@ -14,7 +14,7 @@ func GetAreas(c echo.Context) error {
 
 	var areas []m.Area
 
-	if err := config.DB.Find(&areas).Error; err != nil {
+	if err := config.DB.Preload("Store").Preload("Transaction").Find(&areas).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{

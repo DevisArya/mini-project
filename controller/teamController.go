@@ -22,7 +22,7 @@ func GetTeam(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&team).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Preload("Cleaner").Where("id = ?", id).First(&team).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "team not found",
 		})
@@ -39,7 +39,7 @@ func GetTeams(c echo.Context) error {
 
 	var teams []m.Team
 
-	if err := config.DB.Find(&teams).Error; err != nil {
+	if err := config.DB.Preload("Transaction").Preload("Cleaner").Find(&teams).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
