@@ -11,6 +11,6 @@ COPY . ./
 
 RUN go build -o /mini-project
 
-EXPOSE 8000
+EXPOSE 8080
 
 CMD [ "/mini-project" ]
