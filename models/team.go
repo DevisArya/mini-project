@@ -12,3 +12,7 @@ type TeamResponse struct {
 	Name    string
 	Cleaner []Cleaner
 }
+type TeamResponseCreate struct {
+	Id   uint
+	Name string
+}

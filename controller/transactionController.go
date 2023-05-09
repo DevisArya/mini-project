@@ -215,6 +215,6 @@ func UpdateStatus(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "success update rating",
+		"Message": "success update status",
 	})
 }

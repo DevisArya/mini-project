@@ -10,7 +10,6 @@ import (
 
 type IAreaService interface {
 	CreateArea(area *models.Area) error
-	GetArea(id int) (error, interface{})
 	GetAreaName(name string) error
 	GetAreas() (error, interface{})
 	DeleteArea(id int) error
@@ -43,16 +42,6 @@ func (u *AreaRepository) CreateArea(area *models.Area) error {
 	return nil
 }
 
-func (u *AreaRepository) GetArea(id int) (err error, res interface{}) {
-	var area models.Area
-	if err := config.DB.Preload("Store").Where("id = ?", id).First(&area).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "area not found",
-		}), nil
-	}
-	areaRes := models.AreaResponse{Id: area.Id, Name: area.Name, Store: area.Store}
-	return nil, areaRes
-}
 func (u *AreaRepository) GetAreaName(name string) (err error) {
 	var area models.Area
 	if err := config.DB.Where("name = ?", name).First(&area).Error; err != nil {
@@ -69,12 +58,36 @@ func (u *AreaRepository) GetAreas() (err error, res interface{}) {
 	if err := config.DB.Preload("Store").Find(&areas).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()), nil
 	}
-	var areaResponse []models.AreaResponse
+	var areaResponse []models.AreaResponseStore
+
+	// for i, res := range areas {
+	// 	areaRes := models.AreaResponse{Id: res.Id, Name: res.Name, Store: res.Store}
+	// 	areaResponse = append(areaResponse, areaRes)
+	// }
+
+	// log.Println(areas[0].Store[0].Id)
 
 	for _, res := range areas {
-		areaRes := models.AreaResponse{Id: res.Id, Name: res.Name, Store: res.Store}
-		areaResponse = append(areaResponse, areaRes)
+		if len(res.Store) == 0 {
+			storeResponse := []models.StoreResponse{}
+			areaRes := models.AreaResponseStore{Id: res.Id, Name: res.Name, Store: storeResponse}
+			areaResponse = append(areaResponse, areaRes)
+		}
+		for _, val := range res.Store {
+			var storeResponse []models.StoreResponse
+			store := models.StoreResponse{
+				Id:      val.Id,
+				AreaId:  val.AreaId,
+				Address: val.Address,
+				Phone:   val.Phone,
+				Email:   val.Email,
+			}
+			storeResponse = append(storeResponse, store)
+			areaRes := models.AreaResponseStore{Id: res.Id, Name: res.Name, Store: storeResponse}
+			areaResponse = append(areaResponse, areaRes)
+		}
 	}
+
 	return nil, areaResponse
 }
 

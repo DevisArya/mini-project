@@ -50,7 +50,7 @@ func (u *ServiceTypeRepository) GetServiceType(id int) (err error, res interface
 			"message": "servicetype not found",
 		}), nil
 	}
-	servicetypeRes := models.ServiceTypeResponse{Name: servicetype.Name, Price: servicetype.Price}
+	servicetypeRes := models.ServiceTypeResponse{Id: servicetype.Id, Name: servicetype.Name, Price: servicetype.Price}
 	return nil, servicetypeRes
 }
 func (u *ServiceTypeRepository) GetServiceTypeName(name string) (err error) {
@@ -73,7 +73,7 @@ func (u *ServiceTypeRepository) GetServiceTypes() (err error, res interface{}) {
 	var servicetypeResponse []models.ServiceTypeResponse
 
 	for _, res := range servicetypes {
-		servicetypeRes := models.ServiceTypeResponse{Name: res.Name, Price: res.Price}
+		servicetypeRes := models.ServiceTypeResponse{Id: res.Id, Name: res.Name, Price: res.Price}
 		servicetypeResponse = append(servicetypeResponse, servicetypeRes)
 	}
 	return nil, servicetypeResponse

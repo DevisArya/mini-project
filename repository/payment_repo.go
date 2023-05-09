@@ -51,7 +51,7 @@ func (u *PaymentRepository) GetPayment(id int) (err error, res interface{}) {
 		}), nil
 	}
 
-	paymentRes := models.PaymentResponse{Name: payment.Name, PaymentType: payment.PaymentType, PaymentNumber: payment.PaymentNumber}
+	paymentRes := models.PaymentResponse{Id: payment.Id, Name: payment.Name, PaymentType: payment.PaymentType, PaymentNumber: payment.PaymentNumber}
 	return nil, paymentRes
 }
 func (u *PaymentRepository) GetPaymentName(name string) (err error) {

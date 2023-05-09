@@ -78,7 +78,7 @@ func CreateTeam(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
-	result := m.TeamResponse{
+	result := m.TeamResponseCreate{
 		Id:   team.Id,
 		Name: team.Name,
 	}

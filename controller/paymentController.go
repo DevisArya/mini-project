@@ -73,10 +73,16 @@ func CreatePayment(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.PaymentResponse{
+		Id:            payment.Id,
+		Name:          payment.Name,
+		PaymentType:   payment.PaymentType,
+		PaymentNumber: payment.PaymentNumber,
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "succes create new payment",
-		"Payment": payment,
+		"Payment": result,
 	})
 }
 

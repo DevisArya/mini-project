@@ -50,7 +50,7 @@ func (u *TeamRepository) GetTeam(id int) (err error, res interface{}) {
 			"message": "team not found",
 		}), nil
 	}
-	teamRes := models.TeamResponse{Name: team.Name, Cleaner: team.Cleaner}
+	teamRes := models.TeamResponse{Id: team.Id, Name: team.Name, Cleaner: team.Cleaner}
 	return nil, teamRes
 }
 func (u *TeamRepository) GetTeamName(name string) (err error) {
@@ -73,7 +73,7 @@ func (u *TeamRepository) GetTeams() (err error, res interface{}) {
 	var teamResponse []models.TeamResponse
 
 	for _, res := range teams {
-		teamRes := models.TeamResponse{Name: res.Name, Cleaner: res.Cleaner}
+		teamRes := models.TeamResponse{Id: res.Id, Name: res.Name, Cleaner: res.Cleaner}
 		teamResponse = append(teamResponse, teamRes)
 	}
 	return nil, teamResponse
