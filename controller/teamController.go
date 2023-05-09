@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -11,40 +11,44 @@ import (
 )
 
 func GetTeam(c echo.Context) error {
-
-	var team m.Team
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	if err := config.DB.Preload("Transaction").Preload("Cleaner").Where("id = ?", id).First(&team).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "team not found",
+	err, res := repository.GetTeamRepository().GetTeam(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get team",
-		"team":    team,
+		"Status":  "200",
+		"Message": "success get team",
+		"Team":    res,
 	})
 
 }
 
 func GetTeams(c echo.Context) error {
 
-	var teams []m.Team
-
-	if err := config.DB.Preload("Transaction").Preload("Cleaner").Find(&teams).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetTeamRepository().GetTeams()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get all teams",
-		"teams":   teams,
+		"Status":  "200",
+		"Message": "success get all teams",
+		"Teams":   res,
 	})
 }
 
@@ -53,18 +57,31 @@ func CreateTeam(c echo.Context) error {
 	team := m.Team{}
 	c.Bind(&team)
 
-	valid := u.PostTeamValidation(team)
+	if err := repository.GetTeamRepository().GetTeamName(team.Name); err == nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "Team Already Exists",
+		})
+	}
+
+	valid := md.PostTeamValidation(team)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&team).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetTeamRepository().CreateTeam(&team); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create new team",
-		"team":    team,
+		"Status":  "200",
+		"Message": "succes create new team",
+		"Team":    team,
 	})
 }
 
@@ -73,23 +90,20 @@ func DeleteTeam(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Team{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetTeamRepository().DeleteTeam(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete team",
+		"Status":  "200",
+		"Message": "success delete team",
 	})
 }
 
@@ -100,24 +114,20 @@ func UpdateTeam(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Model(&m.Team{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetTeamRepository().UpdateTeam(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update team",
+		"Status":  "200",
+		"Message": "success update team",
 	})
 }

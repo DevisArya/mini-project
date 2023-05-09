@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -12,14 +12,17 @@ import (
 
 func GetAreas(c echo.Context) error {
 
-	var areas []m.Area
-
-	if err := config.DB.Preload("Store").Preload("Transaction").Find(&areas).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetAreaRepository().GetAreas()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get all area",
-		"areas":   areas,
+		"Status":  "200",
+		"Message": "success get all area",
+		"Areas":   res,
 	})
 }
 
@@ -28,18 +31,31 @@ func CreateArea(c echo.Context) error {
 	area := m.Area{}
 	c.Bind(&area)
 
-	valid := u.PostAreaValidation(area)
+	if err := repository.GetAreaRepository().GetAreaName(area.Name); err == nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "Email Account Already Exists",
+		})
+	}
+
+	valid := md.PostAreaValidation(area)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&area).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetAreaRepository().CreateArea(&area); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create new area",
-		"area":    area,
+		"Status":  "200",
+		"Message": "succes create new area",
+		"Area":    area,
 	})
 }
 
@@ -48,23 +64,20 @@ func DeleteArea(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Area{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetAreaRepository().DeleteArea(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete area",
+		"Status":  "200",
+		"Message": "success delete area",
 	})
 }
 
@@ -75,24 +88,21 @@ func UpdateArea(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Model(&m.Area{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetAreaRepository().UpdateArea(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update area",
+		"Status":  "200",
+		"Message": "success update area",
 	})
 }

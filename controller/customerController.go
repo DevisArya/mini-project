@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
 	md "miniproject/middleware"
 	m "miniproject/models"
+	"miniproject/repository"
 	u "miniproject/utils"
 	"net/http"
 	"strconv"
@@ -13,39 +13,45 @@ import (
 
 func GetCustomer(c echo.Context) error {
 
-	var customer m.Customer
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	if err := config.DB.Preload("Transaction").Where("id = ?", id).First(&customer).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "customer not found",
+	err, res := repository.GetCustomerRepository().GetCustomer(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success get customer",
-		"customer": customer,
+		"Status":   "200",
+		"Message":  "success get customer",
+		"Customer": res,
 	})
 
 }
 
 func GetCustomers(c echo.Context) error {
 
-	var customers []m.Customer
-
-	if err := config.DB.Preload("Transaction").Find(&customers).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetCustomerRepository().GetCustomers()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":   "success get all customers",
-		"customers": customers,
+		"Status":    "200",
+		"Message":   "success get all customers",
+		"Customers": res,
 	})
 }
 
@@ -53,29 +59,33 @@ func CreateCustomer(c echo.Context) error {
 
 	customer := m.Customer{}
 	c.Bind(&customer)
-	customer.Role = false
 
-	password := customer.Password
-
-	hash, err := u.HashPassword(password)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetCustomerRepository().GetCustomerEmail(customer.Email); err == nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "Email Account Already Exists",
+		})
 	}
 
-	customer.Password = hash
-	valid := u.PostCustValidation(customer)
+	valid := md.PostCustValidation(customer)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&customer).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetCustomerRepository().CreateCustomer(&customer); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "succes create new customer",
-		"customer": customer,
+		"Status":   "200",
+		"Message":  "succes create new customer",
+		"Customer": customer,
 	})
 }
 
@@ -84,23 +94,21 @@ func DeleteCustomer(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Customer{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetCustomerRepository().DeleteCustomer(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete customer",
+		"Status":  "200",
+		"Message": "success delete customer",
 	})
 }
 
@@ -111,8 +119,9 @@ func UpdateCustomer(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
@@ -120,32 +129,34 @@ func UpdateCustomer(c echo.Context) error {
 		hash, err := u.HashPassword(updateData.Password)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"Status":  "400",
+				"Message": err.Error(),
+			})
 		}
 
 		updateData.Password = hash
 	}
 	if updateData.Email != "" {
-		valid := u.EmailValidation(updateData.Email)
+		valid := md.EmailValidation(updateData.Email)
 		if valid != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"Status":  "400",
+				"Message": valid.Error(),
+			})
 		}
 	}
 
-	result := config.DB.Model(&m.Customer{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetCustomerRepository().UpdateCustomer(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update customer",
+		"Status":  "200",
+		"Message": "success update customer",
 	})
 }
 
@@ -153,33 +164,26 @@ func LoginCustomer(c echo.Context) error {
 	customer := m.Customer{}
 	c.Bind(&customer)
 
-	password := customer.Password
-
-	if err := config.DB.Where("email = ?", customer.Email).First(&customer).Error; err != nil {
+	if err := repository.GetCustomerRepository().LoginCustomer(&customer); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "user not found",
-			"error":   err.Error(),
-		})
-	}
-
-	if match := u.CheckPasswordHash(password, customer.Password); match == false {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "mismatch password",
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	token, err := md.CreateToken(int(customer.ID), customer.Name, customer.Role)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "fail login",
-			"error":   err.Error(),
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	customerResponse := m.CustomerResponse{ID: int(customer.ID), Name: customer.Name, Email: customer.Email, Token: token}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success login",
-		"customer": customerResponse,
+		"Status":   "200",
+		"Message":  "success login",
+		"Customer": customerResponse,
 	})
 }

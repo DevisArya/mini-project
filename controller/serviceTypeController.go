@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -12,39 +12,43 @@ import (
 
 func GetServiceType(c echo.Context) error {
 
-	var serviceType m.ServiceType
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
-
-	if err := config.DB.Preload("TransactionDetails").Where("id = ?", id).First(&serviceType).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "service type not found",
+	err, res := repository.GetServiceTypeRepository().GetServiceType(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":      "success get service type",
-		"service type": serviceType,
+		"Status":      "200",
+		"Message":     "success get service type",
+		"ServiceType": res,
 	})
 
 }
 
 func GetServiceTypes(c echo.Context) error {
 
-	var serviceTypes []m.ServiceType
-
-	if err := config.DB.Preload("TransactionDetails").Find(&serviceTypes).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetServiceTypeRepository().GetServiceTypes()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":       "success get all service types",
-		"service types": serviceTypes,
+		"Status":       "200",
+		"Message":      "success get all service types",
+		"ServiceTypes": res,
 	})
 }
 
@@ -53,18 +57,25 @@ func CreateServiceType(c echo.Context) error {
 	serviceType := m.ServiceType{}
 	c.Bind(&serviceType)
 
-	valid := u.PostServiceTypeValidation(serviceType)
+	valid := md.PostServiceTypeValidation(serviceType)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&serviceType).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetServiceTypeRepository().CreateServiceType(&serviceType); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":      "succes create new service type",
-		"service type": serviceType,
+		"Status":      "200",
+		"Message":     "succes create new service type",
+		"ServiceType": serviceType,
 	})
 }
 
@@ -73,23 +84,20 @@ func DeleteServiceType(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.ServiceType{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetServiceTypeRepository().DeleteServiceType(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete service type",
+		"Status":  "200",
+		"Message": "success delete service type",
 	})
 }
 
@@ -100,24 +108,20 @@ func UpdateServiceType(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Model(&m.ServiceType{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetServiceTypeRepository().UpdateServiceType(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update service type",
+		"Status":  "200",
+		"Message": "success update service type",
 	})
 }

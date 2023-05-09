@@ -29,7 +29,7 @@ func Init() *echo.Echo {
 	gCustomer := e.Group("/customer")
 	gCustomer.GET("/", c.GetCustomers, m.IsloggedIn, m.IsAdmin)
 	gCustomer.POST("/", c.CreateCustomer)
-	gCustomer.GET("/:id/", c.GetCustomer, m.IsloggedIn)
+	gCustomer.GET("/:id/", c.GetCustomer, m.IsloggedIn, m.UserActValidator)
 	gCustomer.PUT("/:id/", c.UpdateCustomer, m.IsloggedIn, m.UserActValidator)
 	gCustomer.DELETE("/:id/", c.DeleteCustomer, m.IsloggedIn, m.UserActValidator)
 	gCustomer.POST("/login/", c.LoginCustomer)
@@ -89,6 +89,13 @@ func Init() *echo.Echo {
 	gTransactionDetail.GET("/:id/", c.GetTransactionDetail, m.IsloggedIn)
 	gTransactionDetail.PUT("/:id/", c.UpdateTransactionDetail, m.IsloggedIn)
 	gTransactionDetail.DELETE("/:id/", c.DeleteTransactionDetail, m.IsloggedIn)
+
+	gChart := e.Group("/chart")
+	gChart.GET("/", c.GetCharts, m.IsloggedIn)
+	gChart.POST("/", c.CreateChart, m.IsloggedIn)
+	gChart.GET("/:id/", c.GetChart, m.IsloggedIn)
+	gChart.PUT("/:id/", c.UpdateChart, m.IsloggedIn)
+	gChart.DELETE("/:id/", c.DeleteChart, m.IsloggedIn)
 
 	return e
 }

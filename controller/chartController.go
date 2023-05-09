@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"miniproject/config"
 	md "miniproject/middleware"
 	m "miniproject/models"
 	"miniproject/repository"
@@ -10,7 +11,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetStore(c echo.Context) error {
+func GetChart(c echo.Context) error {
+
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -19,25 +21,25 @@ func GetStore(c echo.Context) error {
 			"Message": "invalid id",
 		})
 	}
-
-	err, res := repository.GetStoreRepository().GetStore(id)
+	err, res := repository.GetChartRepository().GetChart(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"Status":  "400",
+			"Status":  "500",
 			"Message": err.Error(),
 		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "success get store",
-		"Store":   res,
+		"Message": "success get chart",
+		"chart":   res,
 	})
 
 }
 
-func GetStores(c echo.Context) error {
+func GetCharts(c echo.Context) error {
 
-	err, res := repository.GetStoreRepository().GetStores()
+	err, res := repository.GetChartRepository().GetCharts()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"Status":  "500",
@@ -46,38 +48,55 @@ func GetStores(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "success get all stores",
-		"Stores":  res,
+		"Message": "success get all charts",
+		"Charts":  res,
 	})
 }
 
-func CreateStore(c echo.Context) error {
+func CreateChart(c echo.Context) error {
+	serviceType := m.ServiceType{}
+	chart := m.Chart{}
+	c.Bind(&chart)
 
-	store := m.Store{}
-	c.Bind(&store)
-
-	valid := md.PostStoreValidation(store)
+	valid := md.PostChartValidation(chart)
 	if valid != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
 			"Message": valid.Error(),
 		})
 	}
-	if err := repository.GetStoreRepository().CreateStore(&store); err != nil {
+
+	if err := config.DB.First(&serviceType, chart.ServiceTypeID).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
+		})
+	}
+
+	totalPrice := serviceType.Price * uint64(chart.Qty)
+	chart.TotalPrice = uint(totalPrice)
+
+	if err := repository.GetChartRepository().CreateChart(&chart); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"Status":  "500",
 			"Message": err.Error(),
 		})
 	}
-
+	chartRes := m.ChartResponse{
+		Id:            chart.ID,
+		CustomerID:    chart.CustomerID,
+		ServiceTypeID: chart.ServiceTypeID,
+		Qty:           chart.Qty,
+		TotalPrice:    chart.TotalPrice,
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "succes create new store",
-		"Store":   store,
+		"Message": "succes create new chart",
+		"Chart":   chartRes,
 	})
 }
 
-func DeleteStore(c echo.Context) error {
+func DeleteChart(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -87,7 +106,7 @@ func DeleteStore(c echo.Context) error {
 		})
 	}
 
-	if err := repository.GetStoreRepository().DeleteStore(id); err != nil {
+	if err := repository.GetChartRepository().DeleteChart(id); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
 			"Message": err.Error(),
@@ -95,12 +114,12 @@ func DeleteStore(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "success delete store",
+		"Message": "success delete chart",
 	})
 }
 
-func UpdateStore(c echo.Context) error {
-	updateData := m.Store{}
+func UpdateChart(c echo.Context) error {
+	updateData := m.Chart{}
 	c.Bind(&updateData)
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -108,11 +127,11 @@ func UpdateStore(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
-			"Message": err.Error(),
+			"Message": "invalid id",
 		})
 	}
 
-	if err := repository.GetStoreRepository().UpdateStore(&updateData, id); err != nil {
+	if err := repository.GetChartRepository().UpdateChart(&updateData, id); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
 			"Message": err.Error(),
@@ -121,6 +140,6 @@ func UpdateStore(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
-		"Message": "success update store",
+		"Message": "success update chart",
 	})
 }

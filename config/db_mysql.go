@@ -67,5 +67,6 @@ func InitialMigration() {
 		&models.Team{},
 		&models.TransactionDetail{},
 		&models.Transaction{},
+		&models.Chart{},
 	)
 }

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -12,66 +12,68 @@ import (
 
 func GetTransactionDetail(c echo.Context) error {
 
-	var transactionDetail m.TransactionDetail
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
-
-	if err := config.DB.Where("id = ?", id).First(&transactionDetail).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "transaction detail not found",
+	err, res := repository.GetTransactionDetailRepository().GetTransactionDetail(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":            "success get transaction detail",
-		"transaction detail": transactionDetail,
+		"Status":            "200",
+		"Message":           "success get transaction detail",
+		"TransactionDetail": res,
 	})
 
 }
 
 func GetTransactionDetails(c echo.Context) error {
 
-	var transactionDetails []m.TransactionDetail
-
-	if err := config.DB.Find(&transactionDetails).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetTransactionDetailRepository().GetTransactionDetails()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":             "success get all transaction details",
-		"transaction details": transactionDetails,
+		"Status":             "200",
+		"Message":            "success get all transaction details",
+		"TransactionDetails": res,
 	})
 }
 
 func CreateTransactionDetail(c echo.Context) error {
-	serviceType := m.ServiceType{}
 	transactionDetail := m.TransactionDetail{}
 	c.Bind(&transactionDetail)
 
-	valid := u.PostTransactionDetailValidation(transactionDetail)
+	valid := md.PostTransactionDetailValidation(transactionDetail)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.First(&serviceType, transactionDetail.ServiceTypeID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetTransactionDetailRepository().CreateTransactionDetail(&transactionDetail); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
-
-	totalPrice := serviceType.Price * uint64(transactionDetail.Qty)
-	transactionDetail.TotalPrice = uint(totalPrice)
-
-	if err := config.DB.Save(&transactionDetail).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":            "succes create new transaction detail",
-		"transaction detail": transactionDetail,
+		"Status":            "200",
+		"Message":           "succes create new transaction detail",
+		"TransactionDetail": transactionDetail,
 	})
 }
 
@@ -80,23 +82,20 @@ func DeleteTransactionDetail(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.TransactionDetail{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetTransactionDetailRepository().DeleteTransactionDetail(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete transaction detail",
+		"Status":  "200",
+		"Message": "success delete transaction detail",
 	})
 }
 
@@ -108,23 +107,20 @@ func UpdateTransactionDetail(c echo.Context) error {
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Model(&m.TransactionDetail{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetTransactionDetailRepository().UpdateTransactionDetail(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update transaction detail",
+		"Status":  "200",
+		"Message": "success update transaction detail",
 	})
 }

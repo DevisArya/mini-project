@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -13,10 +12,7 @@ import (
 )
 
 var secretKey = func() string {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	godotenv.Load()
 	key := os.Getenv("SECRET_KEY")
 
 	return key

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
 	md "miniproject/middleware"
 	m "miniproject/models"
+	"miniproject/repository"
 	u "miniproject/utils"
 	"net/http"
 	"strconv"
@@ -13,39 +13,45 @@ import (
 
 func GetAdmin(c echo.Context) error {
 
-	var admin m.Admin
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	if err := config.DB.Where("id = ?", id).First(&admin).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "admin not found",
+	err, res := repository.GetAdminRepository().GetAdmin(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get admin",
-		"admin":   admin,
+		"Status":  "200",
+		"Message": "success get admin",
+		"Admin":   res,
 	})
 
 }
 
 func GetAdmins(c echo.Context) error {
 
-	var admins []m.Admin
-
-	if err := config.DB.Find(&admins).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetAdminRepository().GetAdmins()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get all admins",
-		"admins":  admins,
+		"Status":  "200",
+		"Message": "success get all admins",
+		"Admins":  res,
 	})
 }
 
@@ -53,29 +59,32 @@ func CreateAdmin(c echo.Context) error {
 
 	admin := m.Admin{}
 	c.Bind(&admin)
-	admin.Role = true
 
-	password := admin.Password
-
-	hash, err := u.HashPassword(password)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetAdminRepository().GetAdminEmail(admin.Email); err == nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "Email Account Already Exists",
+		})
 	}
-
-	admin.Password = hash
-	valid := u.PostAdminValidation(admin)
+	valid := md.PostAdminValidation(admin)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&admin).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetAdminRepository().CreateAdmin(&admin); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create new admin",
-		"admin":   admin,
+		"Status":  "200",
+		"Message": "succes create new admin",
+		"Admin":   admin,
 	})
 }
 
@@ -84,23 +93,21 @@ func DeleteAdmin(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Admin{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetAdminRepository().DeleteAdmin(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete admin",
+		"Status":  "200",
+		"Message": "success delete admin",
 	})
 }
 
@@ -111,8 +118,9 @@ func UpdateAdmin(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
@@ -120,33 +128,35 @@ func UpdateAdmin(c echo.Context) error {
 		hash, err := u.HashPassword(updateData.Password)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"Status":  "400",
+				"Message": err.Error(),
+			})
 		}
 
 		updateData.Password = hash
 	}
 
 	if updateData.Email != "" {
-		valid := u.EmailValidation(updateData.Email)
+		valid := md.EmailValidation(updateData.Email)
 		if valid != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"Status":  "400",
+				"Message": valid.Error(),
+			})
 		}
 	}
 
-	result := config.DB.Model(&m.Admin{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetAdminRepository().UpdateAdmin(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update admin",
+		"Status":  "200",
+		"Message": "success update admin",
 	})
 }
 
@@ -154,33 +164,26 @@ func LoginAdmin(c echo.Context) error {
 	admin := m.Admin{}
 	c.Bind(&admin)
 
-	password := admin.Password
-
-	if err := config.DB.Where("email = ?", admin.Email).First(&admin).Error; err != nil {
+	if err := repository.GetAdminRepository().LoginAdmin(&admin); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "user not found",
-			"error":   err.Error(),
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
-	if match := u.CheckPasswordHash(password, admin.Password); match == false {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "mismatch password",
-		})
-	}
-
-	token, err := md.CreateToken(int(admin.ID), admin.Name, admin.Role)
+	token, err := md.CreateToken(int(admin.Id), admin.Name, admin.Role)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "fail login",
-			"error":   err.Error(),
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
-	adminResponse := m.AdminResponse{ID: int(admin.ID), Name: admin.Name, Email: admin.Email, Token: token}
+	adminResponse := m.AdminResponse{Id: int(admin.Id), Name: admin.Name, Email: admin.Email, Token: token}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success login",
-		"admin":   adminResponse,
+		"Status":  "200",
+		"Message": "success login",
+		"Admin":   adminResponse,
 	})
 }
