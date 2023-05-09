@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type Customer struct {
-	gorm.Model
+	ID          uint   `json:"id" form:"id"`
 	Name        string `json:"name" form:"name" validate:"required"`
 	Address     string `json:"address" form:"address" validate:"required"`
 	Phone       string `json:"phone" form:"phone" validate:"required,min=10,max=13"`

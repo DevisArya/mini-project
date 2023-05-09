@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -12,40 +12,45 @@ import (
 
 func GetPayment(c echo.Context) error {
 
-	var payment m.Payment
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	if err := config.DB.Preload("Transaction").Where("id = ?", id).First(&payment).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "payment not found",
+	err, res := repository.GetPaymentRepository().GetPayment(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get payment",
-		"payment": payment,
+		"Status":  "200",
+		"Message": "success get payment",
+		"Payment": res,
 	})
 
 }
 
 func GetPayments(c echo.Context) error {
 
-	var payments []m.Payment
-
-	if err := config.DB.Preload("Transaction").Find(&payments).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetPaymentRepository().GetPayments()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success get all payments",
-		"payments": payments,
+		"Status":   "200",
+		"Message":  "success get all payments",
+		"Payments": res,
 	})
 }
 
@@ -54,18 +59,24 @@ func CreatePayment(c echo.Context) error {
 	payment := m.Payment{}
 	c.Bind(&payment)
 
-	valid := u.PostPaymentValidation(payment)
+	valid := md.PostPaymentValidation(payment)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&payment).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetPaymentRepository().CreatePayment(&payment); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create new payment",
-		"payment": payment,
+		"Status":  "200",
+		"Message": "succes create new payment",
+		"Payment": payment,
 	})
 }
 
@@ -74,23 +85,21 @@ func DeletePayment(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Payment{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetPaymentRepository().DeletePayment(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete payment",
+		"Status":  "200",
+		"Message": "success delete payment",
 	})
 }
 
@@ -101,24 +110,21 @@ func UpdatePayment(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
-	result := config.DB.Model(&m.Payment{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetPaymentRepository().UpdatePayment(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update payment",
+		"Status":  "200",
+		"Message": "success update payment",
 	})
 }

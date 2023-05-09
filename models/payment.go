@@ -1,11 +1,16 @@
 package models
 
-import "gorm.io/gorm"
-
 type Payment struct {
-	gorm.Model
+	ID            uint          `json:"id" form:"id" gorm:"primarykey"`
 	Name          string        `json:"name" form:"name" validate:"required"`
-	PaymentType   string        `json:"paymenttype" form:"paymenttype" validate:"required"`
-	PaymentNumber string        `json:"paymentnumber" form:"paymentnumber" validate:"required"`
+	PaymentType   string        `json:"paymentType" form:"paymentType" validate:"required"`
+	PaymentNumber string        `json:"paymentNumber" form:"paymentNumber" validate:"required"`
 	Transaction   []Transaction `gorm:"foreignKey:PaymentID"`
+}
+
+type PaymentResponse struct {
+	ID            uint   `json:"id" form:"id"`
+	Name          string `json:"name" form:"name" validate:"required"`
+	PaymentType   string `json:"paymentType" form:"paymentType" validate:"required"`
+	PaymentNumber string `json:"paymentNumber" form:"paymentNumber" validate:"required"`
 }

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"miniproject/config"
+	md "miniproject/middleware"
 	m "miniproject/models"
-	u "miniproject/utils"
+	"miniproject/repository"
 	"net/http"
 	"strconv"
 
@@ -12,39 +12,44 @@ import (
 
 func GetCleaner(c echo.Context) error {
 
-	var cleaner m.Cleaner
-
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	if err := config.DB.Preload("Cleaner").Where("id = ?", id).First(&cleaner).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "cleaner not found",
+	err, res := repository.GetCleanerRepository().GetCleaner(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get cleaner",
-		"cleaner": cleaner,
+		"Status":  "200",
+		"Message": "success get cleaner",
+		"Cleaner": res,
 	})
 
 }
 
 func GetCleaners(c echo.Context) error {
 
-	var cleaners []m.Cleaner
-
-	if err := config.DB.Preload("Cleaner").Find(&cleaners).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	err, res := repository.GetCleanerRepository().GetCleaners()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success get all cleaners",
-		"cleaners": cleaners,
+		"Status":   "200",
+		"Message":  "success get all cleaners",
+		"Cleaners": res,
 	})
 }
 
@@ -53,18 +58,25 @@ func CreateCleaner(c echo.Context) error {
 	cleaner := m.Cleaner{}
 	c.Bind(&cleaner)
 
-	valid := u.PostCleanerValidation(cleaner)
+	valid := md.PostCleanerValidation(cleaner)
 	if valid != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, valid.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": valid.Error(),
+		})
 	}
 
-	if err := config.DB.Save(&cleaner).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := repository.GetCleanerRepository().CreateCleaner(&cleaner); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"Status":  "500",
+			"Message": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create new cleaner",
-		"cleaner": cleaner,
+		"Status":  "200",
+		"Message": "succes create new cleaner",
+		"Cleaner": cleaner,
 	})
 }
 
@@ -73,23 +85,19 @@ func DeleteCleaner(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Delete(&m.Cleaner{}, id)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetCleanerRepository().DeleteCleaner(id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success delete cleaner",
+		"Message": "success delete cleaner",
 	})
 }
 
@@ -101,23 +109,20 @@ func UpdateCleaner(c echo.Context) error {
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "invalid id",
+			"Status":  "400",
+			"Message": "invalid id",
 		})
 	}
 
-	result := config.DB.Model(&m.Cleaner{}).Where("id = ?", id).Updates(&updateData)
-
-	if err := result.Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if result.RowsAffected < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "id not found",
+	if err := repository.GetCleanerRepository().UpdateCleaner(&updateData, id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"Status":  "400",
+			"Message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success update cleaner",
+		"Status":  "200",
+		"Message": "success update cleaner",
 	})
 }

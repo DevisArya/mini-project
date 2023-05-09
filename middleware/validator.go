@@ -1,4 +1,4 @@
-package utils
+package middleware
 
 import (
 	"errors"
@@ -177,14 +177,14 @@ func PostTeamValidation(team models.Team) error {
 
 	return nil
 }
+func PostChartValidation(chart models.Chart) error {
+	v := validator.New()
 
-// func UserActValidator(c echo.Context, id int) error {
-// 	user := c.Get("user").(*jwt.Token)
-// 	claims := user.Claims.(jwt.MapClaims)
-// 	claimsID := claims["id"]
+	err := v.Struct(chart)
 
-// 	if claimsID == id {
-// 		return errors.New("message: unauthorize delete or update")
-// 	}
-// 	return nil
-// }
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	return nil
+}
