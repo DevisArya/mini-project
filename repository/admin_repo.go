@@ -63,7 +63,15 @@ func (u *AdminRepository) GetAdmin(id int) (err error, res interface{}) {
 			"message": "admin not found",
 		}), nil
 	}
-	return nil, admin
+	result := models.AdminResponse{
+		Id:      admin.Id,
+		Name:    admin.Name,
+		Address: admin.Address,
+		Phone:   admin.Phone,
+		Email:   admin.Email,
+		Role:    admin.Role,
+	}
+	return nil, result
 }
 func (u *AdminRepository) GetAdminEmail(email string) (err error) {
 	var admin models.Admin
@@ -81,7 +89,21 @@ func (u *AdminRepository) GetAdmins() (err error, res interface{}) {
 	if err := config.DB.Find(&admins).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()), nil
 	}
-	return nil, admins
+
+	var adminResponse []models.AdminResponse
+
+	for _, val := range admins {
+		result := models.AdminResponse{
+			Id:      val.Id,
+			Name:    val.Name,
+			Address: val.Address,
+			Phone:   val.Phone,
+			Email:   val.Email,
+			Role:    val.Role,
+		}
+		adminResponse = append(adminResponse, result)
+	}
+	return nil, adminResponse
 }
 
 func (u *AdminRepository) DeleteAdmin(id int) error {

@@ -28,7 +28,7 @@ func (um *AreaRepositoryMock) GetArea(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataArea {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -76,7 +76,7 @@ func (um *AreaRepositoryMock) DeleteArea(id int) error {
 	}
 	var index int
 	for i, val := range dataArea {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -97,7 +97,7 @@ func (um *AreaRepositoryMock) UpdateArea(dataUpdate *models.Area, id int) error 
 	}
 	var index int
 	for i, val := range dataArea {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

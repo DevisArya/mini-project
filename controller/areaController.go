@@ -52,10 +52,11 @@ func CreateArea(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	areaRes := m.AreaResponse{Id: area.Id, Name: area.Name}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "succes create new area",
-		"Area":    area,
+		"Area":    areaRes,
 	})
 }
 

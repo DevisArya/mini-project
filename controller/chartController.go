@@ -66,7 +66,7 @@ func CreateChart(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.First(&serviceType, chart.ServiceTypeID).Error; err != nil {
+	if err := config.DB.First(&serviceType, chart.ServiceTypeId).Error; err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
 			"Message": err.Error(),
@@ -83,9 +83,9 @@ func CreateChart(c echo.Context) error {
 		})
 	}
 	chartRes := m.ChartResponse{
-		Id:            chart.ID,
-		CustomerID:    chart.CustomerID,
-		ServiceTypeID: chart.ServiceTypeID,
+		Id:            chart.Id,
+		CustomerId:    chart.CustomerId,
+		ServiceTypeId: chart.ServiceTypeId,
 		Qty:           chart.Qty,
 		TotalPrice:    chart.TotalPrice,
 	}

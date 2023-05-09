@@ -28,7 +28,7 @@ func (um *TransactionRepositoryMock) GetTransaction(id int) (error, interface{})
 	}
 	var index int
 	for i, val := range dataTransaction {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *TransactionRepositoryMock) DeleteTransaction(id int) error {
 	}
 	var index int
 	for i, val := range dataTransaction {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *TransactionRepositoryMock) UpdateTransaction(dataUpdate *models.Transa
 	}
 	var index int
 	for i, val := range dataTransaction {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

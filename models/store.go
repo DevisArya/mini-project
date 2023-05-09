@@ -1,10 +1,17 @@
 package models
 
 type Store struct {
-	ID      uint      `json:"id" form:"id" gorm:"primarykey"`
-	AreaID  uint      `json:"areaId" form:"areaId" validate:"required"`
-	Address string    `json:"address" form:"address" validate:"required"`
-	Phone   string    `json:"phone" form:"phone" validate:"required,min=10,max=13"`
-	Email   string    `json:"email" form:"email" validate:"required,email"`
+	Id      uint      `json:"Id" form:"Id" gorm:"primarykey"`
+	AreaId  uint      `json:"AreaId" form:"AreaId" validate:"required"`
+	Address string    `json:"Address" form:"Address" validate:"required"`
+	Phone   string    `json:"Phone" form:"Phone" validate:"required,min=10,max=13"`
+	Email   string    `json:"Email" form:"Email" validate:"required,email"`
 	Cleaner []Cleaner `gorm:"foreignKey:CleanerID"`
+}
+type StoreResponse struct {
+	Id      uint
+	AreaId  uint
+	Address string
+	Phone   string
+	Email   string
 }

@@ -45,7 +45,7 @@ func (u *StoreRepository) CreateStore(store *models.Store) error {
 
 func (u *StoreRepository) GetStore(id int) (err error, res interface{}) {
 	var store models.Store
-	if err := config.DB.Where("id = ?", id).First(&store).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Where("id = ?", id).First(&store).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "store not found",
 		}), nil
@@ -65,7 +65,7 @@ func (u *StoreRepository) GetStoreEmail(email string) (err error) {
 func (u *StoreRepository) GetStores() (err error, res interface{}) {
 	var stores []models.Store
 
-	if err := config.DB.Find(&stores).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Find(&stores).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()), nil
 	}
 	return nil, stores

@@ -31,7 +31,7 @@ func (um *CleanerRepositoryMock) GetCleaner(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataCleaner {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -79,7 +79,7 @@ func (um *CleanerRepositoryMock) DeleteCleaner(id int) error {
 	}
 	var index int
 	for i, val := range dataCleaner {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -100,7 +100,7 @@ func (um *CleanerRepositoryMock) UpdateCleaner(dataUpdate *models.Cleaner, id in
 	}
 	var index int
 	for i, val := range dataCleaner {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

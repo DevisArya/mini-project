@@ -71,11 +71,16 @@ func CreateServiceType(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.ServiceTypeResponse{
+		Id:    serviceType.Id,
+		Name:  serviceType.Name,
+		Price: serviceType.Price,
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":      "200",
 		"Message":     "succes create new service type",
-		"ServiceType": serviceType,
+		"ServiceType": result,
 	})
 }
 

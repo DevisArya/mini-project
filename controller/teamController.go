@@ -78,10 +78,14 @@ func CreateTeam(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.TeamResponse{
+		Id:   team.Id,
+		Name: team.Name,
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "succes create new team",
-		"Team":    team,
+		"Team":    result,
 	})
 }
 

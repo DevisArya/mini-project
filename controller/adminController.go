@@ -29,7 +29,6 @@ func GetAdmin(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "success get admin",
@@ -81,10 +80,19 @@ func CreateAdmin(c echo.Context) error {
 		})
 	}
 
+	result := m.AdminResponse{
+		Id:      admin.Id,
+		Name:    admin.Name,
+		Address: admin.Address,
+		Phone:   admin.Phone,
+		Email:   admin.Email,
+		Role:    admin.Role,
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "succes create new admin",
-		"Admin":   admin,
+		"Admin":   result,
 	})
 }
 
@@ -179,7 +187,7 @@ func LoginAdmin(c echo.Context) error {
 		})
 	}
 
-	adminResponse := m.AdminResponse{Id: int(admin.Id), Name: admin.Name, Email: admin.Email, Token: token}
+	adminResponse := m.AdminResponseLogin{Id: int(admin.Id), Name: admin.Name, Email: admin.Email, Token: token}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",

@@ -28,7 +28,7 @@ func (um *ChartRepositoryMock) GetChart(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataChart {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *ChartRepositoryMock) DeleteChart(id int) error {
 	}
 	var index int
 	for i, val := range dataChart {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *ChartRepositoryMock) UpdateChart(dataUpdate *models.Chart, id int) err
 	}
 	var index int
 	for i, val := range dataChart {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

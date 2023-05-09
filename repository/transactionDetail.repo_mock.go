@@ -28,7 +28,7 @@ func (um *TransactionDetailRepositoryMock) GetTransactionDetail(id int) (error, 
 	}
 	var index int
 	for i, val := range dataTransactionDetail {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *TransactionDetailRepositoryMock) DeleteTransactionDetail(id int) error
 	}
 	var index int
 	for i, val := range dataTransactionDetail {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *TransactionDetailRepositoryMock) UpdateTransactionDetail(dataUpdate *m
 	}
 	var index int
 	for i, val := range dataTransactionDetail {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

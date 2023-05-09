@@ -50,9 +50,9 @@ func (u *ChartRepository) GetChart(id int) (err error, res interface{}) {
 		}), nil
 	}
 	chartRes := models.ChartResponse{
-		Id:            chart.ID,
-		CustomerID:    chart.CustomerID,
-		ServiceTypeID: chart.ServiceTypeID,
+		Id:            chart.Id,
+		CustomerId:    chart.CustomerId,
+		ServiceTypeId: chart.ServiceTypeId,
 		Qty:           chart.Qty,
 		TotalPrice:    chart.TotalPrice,
 	}
@@ -69,9 +69,9 @@ func (u *ChartRepository) GetCharts() (err error, res interface{}) {
 
 	for _, val := range charts {
 		chartRes := models.ChartResponse{
-			Id:            val.ID,
-			CustomerID:    val.CustomerID,
-			ServiceTypeID: val.ServiceTypeID,
+			Id:            val.Id,
+			CustomerId:    val.CustomerId,
+			ServiceTypeId: val.ServiceTypeId,
 			Qty:           val.Qty,
 			TotalPrice:    val.TotalPrice,
 		}

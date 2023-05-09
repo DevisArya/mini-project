@@ -79,11 +79,19 @@ func CreateTransaction(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.TransactionResponse{
+		Id:         transaction.CustomerId,
+		CustomerId: transaction.CustomerId,
+		TeamId:     transaction.TeamId,
+		PaymentId:  transaction.PaymentId,
+		Location:   transaction.Location,
+		AreaId:     transaction.AreaId,
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":      "200",
 		"Message":     "succes create new transaction",
-		"Transaction": transaction,
+		"Transaction": result,
 	})
 }
 

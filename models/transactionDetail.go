@@ -1,11 +1,9 @@
 package models
 
-import "gorm.io/gorm"
-
 type TransactionDetail struct {
-	gorm.Model
-	TransactionID uint `json:"transactionid" form:"transactionid" validate:"required"`
-	ServiceTypeID uint `json:"servicetypeid" form:"servicetypeid" validate:"required"`
-	Qty           uint `json:"qty" form:"qty" validate:"required"`
+	Id            uint `json:"Id" form:"Id" gorm:"primarykey"`
+	TransactionId uint `json:"TransactionId" form:"TransactionId" validate:"required"`
+	ServiceTypeId uint `json:"ServiceTypeId" form:"ServiceTypeId" validate:"required"`
+	Qty           uint `json:"Qty" form:"Qty" validate:"required"`
 	TotalPrice    uint
 }

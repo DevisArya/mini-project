@@ -28,7 +28,7 @@ func (um *PaymentRepositoryMock) GetPayment(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataPayment {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *PaymentRepositoryMock) DeletePayment(id int) error {
 	}
 	var index int
 	for i, val := range dataPayment {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *PaymentRepositoryMock) UpdatePayment(dataUpdate *models.Payment, id in
 	}
 	var index int
 	for i, val := range dataPayment {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

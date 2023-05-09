@@ -73,7 +73,7 @@ func (u *PaymentRepository) GetPayments() (err error, res interface{}) {
 	var paymentResponse []models.PaymentResponse
 
 	for _, res := range payments {
-		paymentRes := models.PaymentResponse{ID: res.ID, Name: res.Name, PaymentType: res.PaymentType, PaymentNumber: res.PaymentNumber}
+		paymentRes := models.PaymentResponse{Id: res.Id, Name: res.Name, PaymentType: res.PaymentType, PaymentNumber: res.PaymentNumber}
 		paymentResponse = append(paymentResponse, paymentRes)
 	}
 

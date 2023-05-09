@@ -81,11 +81,18 @@ func CreateCustomer(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.CustomerResponse{
+		Id:      customer.Id,
+		Name:    customer.Name,
+		Address: customer.Address,
+		Phone:   customer.Phone,
+		Email:   customer.Email,
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":   "200",
 		"Message":  "succes create new customer",
-		"Customer": customer,
+		"Customer": result,
 	})
 }
 
@@ -171,7 +178,7 @@ func LoginCustomer(c echo.Context) error {
 		})
 	}
 
-	token, err := md.CreateToken(int(customer.ID), customer.Name, customer.Role)
+	token, err := md.CreateToken(int(customer.Id), customer.Name, customer.Role)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"Status":  "400",
@@ -179,7 +186,7 @@ func LoginCustomer(c echo.Context) error {
 		})
 	}
 
-	customerResponse := m.CustomerResponse{ID: int(customer.ID), Name: customer.Name, Email: customer.Email, Token: token}
+	customerResponse := m.AdminResponseLogin{Id: int(customer.Id), Name: customer.Name, Email: customer.Email, Token: token}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":   "200",
