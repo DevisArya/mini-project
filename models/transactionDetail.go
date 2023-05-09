@@ -5,5 +5,5 @@ type TransactionDetail struct {
 	TransactionId uint `json:"TransactionId" form:"TransactionId" validate:"required"`
 	ServiceTypeId uint `json:"ServiceTypeId" form:"ServiceTypeId" validate:"required"`
 	Qty           uint `json:"Qty" form:"Qty" validate:"required"`
-	TotalPrice    uint
+	TotalPrice    uint `json:"TotalPrice" form:"TotalPrice" validate:"required"`
 }

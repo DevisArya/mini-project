@@ -81,7 +81,7 @@ func CreateCustomer(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
-	result := m.CustomerResponse{
+	result := m.CustomerResponseCreate{
 		Id:      customer.Id,
 		Name:    customer.Name,
 		Address: customer.Address,

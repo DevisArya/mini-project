@@ -18,6 +18,13 @@ type CustomerResponse struct {
 	Email       string
 	Transaction []Transaction `gorm:"foreignKey:CustomerID"`
 }
+type CustomerResponseCreate struct {
+	Id      uint
+	Name    string
+	Address string
+	Phone   string
+	Email   string
+}
 
 type CustomerResponseLogin struct {
 	Id    int

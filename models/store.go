@@ -6,7 +6,7 @@ type Store struct {
 	Address string    `json:"Address" form:"Address" validate:"required"`
 	Phone   string    `json:"Phone" form:"Phone" validate:"required,min=10,max=13"`
 	Email   string    `json:"Email" form:"Email" validate:"required,email"`
-	Cleaner []Cleaner `gorm:"foreignKey:CleanerID"`
+	Cleaner []Cleaner `gorm:"foreignKey:StoreId"`
 }
 type StoreResponse struct {
 	Id      uint

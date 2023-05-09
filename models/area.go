@@ -11,3 +11,12 @@ type AreaResponse struct {
 	Name  string
 	Store []Store
 }
+type AreaResponseStore struct {
+	Id    uint
+	Name  string
+	Store []StoreResponse
+}
+type AreaResponseCreate struct {
+	Id   uint
+	Name string
+}
