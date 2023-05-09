@@ -12,6 +12,7 @@ func Init() *echo.Echo {
 	e := echo.New()
 
 	e.Pre(mid.AddTrailingSlash())
+	m.LogMiddleware(e)
 
 	gArea := e.Group("/area")
 	gArea.GET("/", c.GetAreas, m.IsloggedIn)
