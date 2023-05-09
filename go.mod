@@ -11,7 +11,6 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.7.0
-	gorm.io/gorm v1.25.0
 )
 
 require (

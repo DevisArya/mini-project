@@ -50,7 +50,7 @@ func (u *AreaRepository) GetArea(id int) (err error, res interface{}) {
 			"message": "area not found",
 		}), nil
 	}
-	areaRes := models.AreaResponse{ID: area.ID, Name: area.Name, Store: area.Store}
+	areaRes := models.AreaResponse{Id: area.Id, Name: area.Name, Store: area.Store}
 	return nil, areaRes
 }
 func (u *AreaRepository) GetAreaName(name string) (err error) {
@@ -72,7 +72,7 @@ func (u *AreaRepository) GetAreas() (err error, res interface{}) {
 	var areaResponse []models.AreaResponse
 
 	for _, res := range areas {
-		areaRes := models.AreaResponse{ID: res.ID, Name: res.Name, Store: res.Store}
+		areaRes := models.AreaResponse{Id: res.Id, Name: res.Name, Store: res.Store}
 		areaResponse = append(areaResponse, areaRes)
 	}
 	return nil, areaResponse

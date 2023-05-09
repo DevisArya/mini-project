@@ -1,18 +1,16 @@
 package models
 
-import "gorm.io/gorm"
-
 type Chart struct {
-	gorm.Model
-	CustomerID    uint `json:"customerId" form:"customerId" validate:"required"`
-	ServiceTypeID uint `json:"serviceTypeId" form:"serviceTypeId" validate:"required"`
-	Qty           uint `json:"qty" form:"qty" validate:"required"`
+	Id            uint `json:"Id" form:"id" gorm:"primarykey"`
+	CustomerId    uint `json:"CustomerId" form:"CustomerId" validate:"required"`
+	ServiceTypeId uint `json:"ServiceTypeId" form:"ServiceTypeId" validate:"required"`
+	Qty           uint `json:"Qty" form:"Qty" validate:"required"`
 	TotalPrice    uint
 }
 type ChartResponse struct {
 	Id            uint
-	CustomerID    uint
-	ServiceTypeID uint
+	CustomerId    uint
+	ServiceTypeId uint
 	Qty           uint
 	TotalPrice    uint
 }

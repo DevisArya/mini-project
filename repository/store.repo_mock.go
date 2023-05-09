@@ -28,7 +28,7 @@ func (um *StoreRepositoryMock) GetStore(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataStore {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -76,7 +76,7 @@ func (um *StoreRepositoryMock) DeleteStore(id int) error {
 	}
 	var index int
 	for i, val := range dataStore {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -97,7 +97,7 @@ func (um *StoreRepositoryMock) UpdateStore(dataUpdate *models.Store, id int) err
 	}
 	var index int
 	for i, val := range dataStore {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

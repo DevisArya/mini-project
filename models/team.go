@@ -1,14 +1,14 @@
 package models
 
 type Team struct {
-	ID          uint          `json:"id" form:"id" gorm:"primarykey"`
-	Name        string        `json:"name" form:"name" validate:"required"`
+	Id          uint          `json:"Id" form:"Id" gorm:"primarykey"`
+	Name        string        `json:"Name" form:"Name" validate:"required"`
 	Transaction []Transaction `gorm:"foreignKey:TeamID"`
 	Cleaner     []Cleaner     `gorm:"foreignKey:TeamID"`
 }
 
 type TeamResponse struct {
-	ID      uint      `json:"id" form:"id" gorm:"primarykey"`
-	Name    string    `json:"name" form:"name" validate:"required"`
-	Cleaner []Cleaner `gorm:"foreignKey:TeamID"`
+	Id      uint
+	Name    string
+	Cleaner []Cleaner
 }

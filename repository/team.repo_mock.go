@@ -28,7 +28,7 @@ func (um *TeamRepositoryMock) GetTeam(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataTeam {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *TeamRepositoryMock) DeleteTeam(id int) error {
 	}
 	var index int
 	for i, val := range dataTeam {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *TeamRepositoryMock) UpdateTeam(dataUpdate *models.Team, id int) error 
 	}
 	var index int
 	for i, val := range dataTeam {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

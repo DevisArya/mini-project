@@ -1,15 +1,13 @@
 package models
 
-import "gorm.io/gorm"
-
 type ServiceType struct {
-	gorm.Model
-	Name               string              `json:"name" form:"name" validate:"required"`
-	Price              uint64              `json:"price" form:"price" validate:"required"`
+	Id                 uint                `json:"Id" form:"Id" gorm:"primarykey"`
+	Name               string              `json:"Name" form:"Name" validate:"required"`
+	Price              uint64              `json:"Price" form:"Price" validate:"required"`
 	TransactionDetails []TransactionDetail `gorm:"foreignKey:ServiceTypeID"`
 }
 type ServiceTypeResponse struct {
-	gorm.Model
-	Name  string `json:"name" form:"name" validate:"required"`
-	Price uint64 `json:"price" form:"price" validate:"required"`
+	Id    uint
+	Name  string
+	Price uint64
 }

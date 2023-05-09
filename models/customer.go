@@ -1,19 +1,27 @@
 package models
 
 type Customer struct {
-	ID          uint   `json:"id" form:"id"`
-	Name        string `json:"name" form:"name" validate:"required"`
-	Address     string `json:"address" form:"address" validate:"required"`
-	Phone       string `json:"phone" form:"phone" validate:"required,min=10,max=13"`
-	Email       string `json:"email" form:"email" validate:"required,email"`
+	Id          uint   `json:"Id" form:"Id" gorm:"primarykey"`
+	Name        string `json:"Name" form:"Aame" validate:"required"`
+	Address     string `json:"Address" form:"Address" validate:"required"`
+	Phone       string `json:"Phone" form:"Phone" validate:"required,min=10,max=13"`
+	Email       string `json:"Email" form:"Email" validate:"required,email"`
 	Role        bool
-	Password    string        `json:"password" form:"password" validate:"required"`
+	Password    string        `json:"Password" form:"Password" validate:"required"`
+	Transaction []Transaction `gorm:"foreignKey:CustomerID"`
+}
+type CustomerResponse struct {
+	Id          uint
+	Name        string
+	Address     string
+	Phone       string
+	Email       string
 	Transaction []Transaction `gorm:"foreignKey:CustomerID"`
 }
 
-type CustomerResponse struct {
-	ID    int    `json:"id" form:"id"`
-	Name  string `json:"name" form:"name"`
-	Email string `json:"email" form:"email"`
-	Token string `json:"token" form:"token"`
+type CustomerResponseLogin struct {
+	Id    int
+	Name  string
+	Email string
+	Token string
 }

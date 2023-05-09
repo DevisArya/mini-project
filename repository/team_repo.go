@@ -45,7 +45,7 @@ func (u *TeamRepository) CreateTeam(team *models.Team) error {
 
 func (u *TeamRepository) GetTeam(id int) (err error, res interface{}) {
 	var team models.Team
-	if err := config.DB.Where("id = ?", id).First(&team).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Where("id = ?", id).First(&team).Error; err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "team not found",
 		}), nil
@@ -66,7 +66,7 @@ func (u *TeamRepository) GetTeamName(name string) (err error) {
 func (u *TeamRepository) GetTeams() (err error, res interface{}) {
 	var teams []models.Team
 
-	if err := config.DB.Find(&teams).Error; err != nil {
+	if err := config.DB.Preload("Cleaner").Find(&teams).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()), nil
 	}
 

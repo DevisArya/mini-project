@@ -1,22 +1,27 @@
 package models
 
-import "gorm.io/gorm"
-
 type Transaction struct {
-	gorm.Model
-	CustomerID         uint `json:"customerid" form:"customerid" validate:"required"`
-	TeamID             uint `json:"teamid" form:"teamid" validate:"required"`
-	PaymentID          uint `json:"paymentid" form:"paymentid" validate:"required"`
+	Id                 uint `json:"Id" form:"Id" gorm:"primarykey"`
+	CustomerId         uint `json:"CustomerId" form:"CustomerId" validate:"required"`
+	TeamId             uint `json:"TeamId" form:"TeamId" validate:"required"`
+	PaymentId          uint `json:"PaymentId" form:"PaymentId" validate:"required"`
 	Status             bool
-	Location           string `json:"location" form:"location" validate:"required"`
-	AreaID             uint   `json:"areaid" form:"areaid" validate:"required"`
+	Location           string `json:"Location" form:"Location" validate:"required"`
+	AreaId             uint   `json:"AreaId" form:"AreaId" validate:"required"`
 	Rating             uint
 	TransactionDetails []TransactionDetail `gorm:"foreignKey:TransactionID"`
 }
-
+type TransactionResponse struct {
+	Id         uint
+	CustomerId uint
+	TeamId     uint
+	PaymentId  uint
+	Location   string
+	AreaId     uint
+}
 type TransactionUpdateRating struct {
-	Rating uint `json:"rating" form:"rating" validate:"required"`
+	Rating uint `json:"Rating" validate:"required"`
 }
 type TransactionUpdateStatus struct {
-	Status bool `json:"status" form:"status" validate:"required"`
+	Status bool `json:"Status" form:"status" validate:"required"`
 }

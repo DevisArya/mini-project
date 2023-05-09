@@ -64,7 +64,16 @@ func (u *CustomerRepository) GetCustomer(id int) (err error, res interface{}) {
 			"message": "customer not found",
 		}), nil
 	}
-	return nil, customer
+
+	result := models.CustomerResponse{
+		Id:          customer.Id,
+		Name:        customer.Name,
+		Address:     customer.Address,
+		Phone:       customer.Phone,
+		Email:       customer.Email,
+		Transaction: customer.Transaction,
+	}
+	return nil, result
 }
 
 func (u *CustomerRepository) GetCustomerEmail(email string) (err error) {
@@ -83,7 +92,20 @@ func (u *CustomerRepository) GetCustomers() (err error, res interface{}) {
 	if err := config.DB.Preload("Transaction").Find(&customers).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error()), nil
 	}
-	return nil, customers
+	var customerResponse []models.CustomerResponse
+
+	for _, val := range customers {
+		result := models.CustomerResponse{
+			Id:          val.Id,
+			Name:        val.Name,
+			Address:     val.Address,
+			Phone:       val.Phone,
+			Email:       val.Email,
+			Transaction: val.Transaction,
+		}
+		customerResponse = append(customerResponse, result)
+	}
+	return nil, customerResponse
 }
 
 func (u *CustomerRepository) DeleteCustomer(id int) error {

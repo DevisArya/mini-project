@@ -13,7 +13,7 @@ type CustomerRepositoryMock struct {
 
 var dataCustomer = []models.Customer{
 	{
-		ID:       1,
+		Id:       1,
 		Name:     "Devis",
 		Address:  "Jombang",
 		Phone:    "12345678910",
@@ -22,7 +22,7 @@ var dataCustomer = []models.Customer{
 		Password: "123",
 	},
 	{
-		ID:       2,
+		Id:       2,
 		Name:     "Devis2",
 		Address:  "Jombang",
 		Phone:    "12345678910",
@@ -45,7 +45,7 @@ func (um *CustomerRepositoryMock) GetCustomer(id int) (error, interface{}) {
 	}
 	var index int
 	for i, val := range dataCustomer {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -94,7 +94,7 @@ func (um *CustomerRepositoryMock) DeleteCustomer(id int) error {
 	}
 	var index int
 	for i, val := range dataCustomer {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -115,7 +115,7 @@ func (um *CustomerRepositoryMock) UpdateCustomer(dataUpdate *models.Customer, id
 	}
 	var index int
 	for i, val := range dataCustomer {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}

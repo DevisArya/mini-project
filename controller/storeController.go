@@ -69,11 +69,18 @@ func CreateStore(c echo.Context) error {
 			"Message": err.Error(),
 		})
 	}
+	result := m.StoreResponse{
+		Id:      store.Id,
+		AreaId:  store.AreaId,
+		Address: store.Address,
+		Phone:   store.Phone,
+		Email:   store.Email,
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status":  "200",
 		"Message": "succes create new store",
-		"Store":   store,
+		"Store":   result,
 	})
 }
 

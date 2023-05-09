@@ -28,7 +28,7 @@ func (um *ServiceTypeRepositoryMock) GetServiceType(id int) (error, interface{})
 	}
 	var index int
 	for i, val := range dataServiceType {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -56,7 +56,7 @@ func (um *ServiceTypeRepositoryMock) DeleteServiceType(id int) error {
 	}
 	var index int
 	for i, val := range dataServiceType {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
@@ -77,7 +77,7 @@ func (um *ServiceTypeRepositoryMock) UpdateServiceType(dataUpdate *models.Servic
 	}
 	var index int
 	for i, val := range dataServiceType {
-		if val.ID == uint(id) {
+		if val.Id == uint(id) {
 			index = i + 1
 			break
 		}
